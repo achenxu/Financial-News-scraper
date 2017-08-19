@@ -5,21 +5,30 @@
 # This is a financial news scraper. Finds latest earnings news for a list of public companies.
 
 # Libraries needed
+import time
 import pandas
+import xlsxwriter
 import re
 import requests
 from bs4 import BeautifulSoup
 print ("Libraries imported")
 
+#Tracks how much time the script runs
+start = time.time()
+
 # Variables needed
 stocks=[]
 soup2=0
 news_found = 0
+row=1
+col=0
 
 # Load and read excel input file
 file = pandas.read_excel('20160706 - missing earnings.xlsx')
 
 # Results output file
+output_file = xlsxwriter.Workbook('Results.xlsx')
+worksheet = output_file.add_worksheet()
 
 #Stocks list creation
 def extracting_values(file):
@@ -47,7 +56,11 @@ def news_search_transcriptdaily():
     #Going to related news article
     for headline in soup1.find_all('a', href=re.compile(str(stock).lower())):
         exact_news = []
-        exact_news.append(headline['href'])
+        if str(stock) in headline.text:
+            exact_news.append(headline['href'])
+        else:
+            pass
+
         if news_found == 0:
             pass
         elif news_found == 1:
@@ -56,6 +69,9 @@ def news_search_transcriptdaily():
         # Getting text from target news articles
         for news in exact_news:
             making_soup(news)
+            global col
+            col = 5
+
             for text in soup2.find_all('p', text=re.compile ("last issued its earnings results")):
                 print ("\nHere are the actual news lines for: " + str (stock))
                 print (text)
@@ -63,6 +79,24 @@ def news_search_transcriptdaily():
                 break
 
             for text in soup2.find_all('p', text=re.compile ("last issued its earnings data")):
+                print ("\nHere are the actual news lines for: " + str (stock))
+                print (text)
+                news_found = 1
+                break
+
+            for text in soup2.find_all ('p', text=re.compile ("last announced its quarterly earnings results")):
+                print ("\nHere are the actual news lines for: " + str (stock))
+                print (text)
+                news_found = 1
+                break
+
+            for text in soup2.find_all ('p', text=re.compile ("last released its quarterly earnings results")):
+                print ("\nHere are the actual news lines for: " + str (stock))
+                print (text)
+                news_found = 1
+                break
+
+            for text in soup2.find_all ('p', text=re.compile ("last announced its earnings results")):
                 print ("\nHere are the actual news lines for: " + str (stock))
                 print (text)
                 news_found = 1
@@ -81,20 +115,48 @@ def news_search_dailypolitical():
     # Going to related news article
     for headline in soup1.find_all ('a', href=re.compile (str (stock).lower ())):
         exact_news = []
-        exact_news.append (headline['href'])
+        if str(stock) in headline.text:
+            exact_news.append(headline['href'])
+        else:
+            pass
 
         # Getting text from target news articles
         for news in exact_news:
             making_soup (news)
+            global col
+            col = 5
+
             for text in soup2.find_all ('p', text=re.compile ("last issued its earnings results")):
                 print ("\nHere are the actual news lines for: " + str (stock))
                 print (text)
                 news_found = 1
+                break
 
             for text in soup2.find_all ('p', text=re.compile ("last issued its earnings data")):
                 print ("\nHere are the actual news lines for: " + str (stock))
                 print (text)
                 news_found = 1
+                break
+
+            for text in soup2.find_all ('p', text=re.compile ("last announced its quarterly earnings results")):
+                print ("\nHere are the actual news lines for: " + str (stock))
+                print (text)
+                news_found = 1
+                break
+
+            for text in soup2.find_all ('p', text=re.compile ("last released its quarterly earnings results")):
+                print ("\nHere are the actual news lines for: " + str (stock))
+                print (text)
+                news_found = 1
+                break
+
+            for text in soup2.find_all ('p', text=re.compile ("last announced its earnings results")):
+                print ("\nHere are the actual news lines for: " + str (stock))
+                print (text)
+                news_found = 1
+                break
+
+    text = 'No news found'
 
 
 
@@ -129,6 +191,11 @@ for stock in stocks:
 
     else:
         print("Problem with script")
+
+print ('\nAll done!')
+end = time.time()
+print ("\nTotal time for running:")
+print(end - start)
 
 
 
