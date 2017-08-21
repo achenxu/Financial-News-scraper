@@ -64,31 +64,31 @@ def getting_latest_news():
 
             for text in soup2.find_all('p', text=re.compile ("last issued its earnings results")):
                 print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
+                print (text.get_text())
                 news_found = 1
                 break
 
             for text in soup2.find_all('p', text=re.compile ("last issued its earnings data")):
                 print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
+                print (text.get_text())
                 news_found = 1
                 break
 
             for text in soup2.find_all ('p', text=re.compile ("last announced its quarterly earnings results")):
                 print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
+                print (text.get_text())
                 news_found = 1
                 break
 
             for text in soup2.find_all ('p', text=re.compile ("last released its quarterly earnings results")):
                 print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
+                print (text.get_text())
                 news_found = 1
                 break
 
             for text in soup2.find_all ('p', text=re.compile ("last announced its earnings results")):
                 print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
+                print (text.get_text())
                 news_found = 1
                 break
 
@@ -135,6 +135,7 @@ def news_search_marketbeat():
 # Code start
 extracting_values(file)  # to stocks list
 
+#Getting earnings news from several websites
 for stock in stocks:
     news_search_transcriptdaily()  # searching first website
     getting_latest_news()
@@ -149,10 +150,11 @@ for stock in stocks:
     else:
         print("Problem with script")
 
+#End of script
 print ('\nAll done!')
 end = time.time()
 print ("\nTotal time for running:")
-print(end - start)
+print(str(end - start) + "seconds")
 
 
 
