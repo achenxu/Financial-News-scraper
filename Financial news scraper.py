@@ -7,7 +7,6 @@
 # Libraries needed
 import time
 import pandas
-import xlsxwriter
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -27,8 +26,7 @@ col=0
 file = pandas.read_excel('20160706 - missing earnings.xlsx')
 
 # Results output file
-output_file = xlsxwriter.Workbook('Results.xlsx')
-worksheet = output_file.add_worksheet()
+
 
 #Stocks list creation
 def extracting_values(file):
@@ -37,30 +35,22 @@ def extracting_values(file):
     stocks = values.tolist()
     print ("\nThe following stocks have been extracted and added to the stocks[] list: " + str(stocks))
 
-
 # Creating soup objects in general
 def making_soup(url):
     page = requests.get(url)
     global soup2
     soup2 = BeautifulSoup(page.content, 'html.parser')
 
-# Searching transcriptdaily.com website
-def news_search_transcriptdaily():
-    global news_found
-    news_found =0
-    url="https://transcriptdaily.com/?s=" + str(stock)
-    page = requests.get(url)
-    soup1 = BeautifulSoup(page.content,'lxml')
-    print ("\nSearching Transcriptdaily for the target company: " + (str(stock)))
-
-    #Going to related news article
+#Going to related news article
+def getting_latest_news():
+    global soup1
     for headline in soup1.find_all('a', href=re.compile(str(stock).lower())):
         exact_news = []
         if str(stock) in headline.text:
             exact_news.append(headline['href'])
         else:
             pass
-
+        global news_found
         if news_found == 0:
             pass
         elif news_found == 1:
@@ -102,6 +92,16 @@ def news_search_transcriptdaily():
                 news_found = 1
                 break
 
+# Searching transcriptdaily.com website
+def news_search_transcriptdaily():
+    global news_found
+    news_found =0
+    url="https://transcriptdaily.com/?s=" + str(stock)
+    page = requests.get(url)
+    global soup1
+    soup1 = BeautifulSoup(page.content,'lxml')
+    print ("\nSearching Transcriptdaily for the target company: " + (str(stock)))
+
 
 # Searching dailypolitical.com website
 def news_search_dailypolitical():
@@ -112,53 +112,7 @@ def news_search_dailypolitical():
     soup1 = BeautifulSoup (page.content, 'lxml')
     print ("\nSearching Dailypolitical for the target company: " + (str (stock)))
 
-    # Going to related news article
-    for headline in soup1.find_all ('a', href=re.compile (str (stock).lower ())):
-        exact_news = []
-        if str(stock) in headline.text:
-            exact_news.append(headline['href'])
-        else:
-            pass
-
-        # Getting text from target news articles
-        for news in exact_news:
-            making_soup (news)
-            global col
-            col = 5
-
-            for text in soup2.find_all ('p', text=re.compile ("last issued its earnings results")):
-                print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
-                news_found = 1
-                break
-
-            for text in soup2.find_all ('p', text=re.compile ("last issued its earnings data")):
-                print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
-                news_found = 1
-                break
-
-            for text in soup2.find_all ('p', text=re.compile ("last announced its quarterly earnings results")):
-                print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
-                news_found = 1
-                break
-
-            for text in soup2.find_all ('p', text=re.compile ("last released its quarterly earnings results")):
-                print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
-                news_found = 1
-                break
-
-            for text in soup2.find_all ('p', text=re.compile ("last announced its earnings results")):
-                print ("\nHere are the actual news lines for: " + str (stock))
-                print (text)
-                news_found = 1
-                break
-
     text = 'No news found'
-
-
 
 # Searching rttnews.com website
 def news_search_rttnews():
@@ -179,15 +133,18 @@ def news_search_marketbeat():
         print ("\nSearching Marketbeat for the target company: " + (str(stock)))
 
 # Code start
-extracting_values(file)
+extracting_values(file)  # to stocks list
+
 for stock in stocks:
-    news_search_transcriptdaily()
+    news_search_transcriptdaily()  # searching first website
+    getting_latest_news()
 
     if news_found == 1:
         pass
 
     elif news_found == 0:
         news_search_dailypolitical()
+        getting_latest_news()
 
     else:
         print("Problem with script")
